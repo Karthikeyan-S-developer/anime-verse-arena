@@ -14,7 +14,149 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      answers: {
+        Row: {
+          answer: string
+          answer_ms: number
+          created_at: string
+          id: string
+          is_correct: boolean
+          player_id: string
+          points_earned: number
+          question_index: number
+          room_id: string
+        }
+        Insert: {
+          answer: string
+          answer_ms?: number
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          player_id: string
+          points_earned?: number
+          question_index: number
+          room_id: string
+        }
+        Update: {
+          answer?: string
+          answer_ms?: number
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          player_id?: string
+          points_earned?: number
+          question_index?: number
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          correct_count: number
+          created_at: string
+          id: string
+          is_host: boolean
+          ready: boolean
+          room_id: string
+          score: number
+          selected_character: Json | null
+          streak: number
+          total_answer_ms: number
+          username: string
+        }
+        Insert: {
+          correct_count?: number
+          created_at?: string
+          id?: string
+          is_host?: boolean
+          ready?: boolean
+          room_id: string
+          score?: number
+          selected_character?: Json | null
+          streak?: number
+          total_answer_ms?: number
+          username: string
+        }
+        Update: {
+          correct_count?: number
+          created_at?: string
+          id?: string
+          is_host?: boolean
+          ready?: boolean
+          room_id?: string
+          score?: number
+          selected_character?: Json | null
+          streak?: number
+          total_answer_ms?: number
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "players_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          code: string
+          created_at: string
+          current_question: number
+          game_config: Json | null
+          game_mode: string | null
+          host_player_id: string | null
+          id: string
+          question_started_at: string | null
+          questions: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_question?: number
+          game_config?: Json | null
+          game_mode?: string | null
+          host_player_id?: string | null
+          id?: string
+          question_started_at?: string | null
+          questions?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_question?: number
+          game_config?: Json | null
+          game_mode?: string | null
+          host_player_id?: string | null
+          id?: string
+          question_started_at?: string | null
+          questions?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
