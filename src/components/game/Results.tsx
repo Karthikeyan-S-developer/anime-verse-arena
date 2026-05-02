@@ -13,7 +13,6 @@ export function Results({ room, players, playerId }: { room: Room; players: Play
   const navigate = useNavigate();
   const me = players.find((p) => p.id === playerId);
   const isHost = me?.is_host ?? false;
-  const isCoop = room.game_mode === "coop";
 
   const sorted = [...players].sort((a, b) => b.score - a.score);
   const winner = sorted[0];
@@ -29,25 +28,20 @@ export function Results({ room, players, playerId }: { room: Room; players: Play
   };
 
   return (
-    <div className="min-h-screen px-4 py-12 max-w-3xl mx-auto">
-      <div className="text-center mb-8 animate-float-up">
-        <Trophy className="w-20 h-20 mx-auto text-accent mb-3" />
-        <h1 className="font-display text-6xl tracking-widest mb-2">
-          {isCoop ? "MISSION COMPLETE" : tie ? "DRAW" : "VICTORY"}
+    <div className="min-h-screen px-3 sm:px-4 py-8 sm:py-12 max-w-4xl mx-auto">
+      <div className="text-center mb-6 sm:mb-8 animate-float-up">
+        <Trophy className="w-16 h-16 sm:w-20 sm:h-20 mx-auto text-accent mb-3" />
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-widest mb-2">
+          {tie ? "DRAW" : "VICTORY"}
         </h1>
-        {!isCoop && !tie && (
-          <p className="text-xl">
+        {!tie && (
+          <p className="text-lg sm:text-xl">
             <span className="text-primary font-semibold">{winner?.username}</span> wins!
-          </p>
-        )}
-        {isCoop && (
-          <p className="text-xl text-accent font-display tracking-wider">
-            COMBINED SCORE: {sorted.reduce((s, p) => s + p.score, 0)}
           </p>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {sorted.map((p, i) => {
           const totalAnswered = p.correct_count + (p.id === me?.id ? 0 : 0); // we don't track wrongs separately, use correct vs total questions
           const totalQuestions = (room.questions as unknown[])?.length ?? 0;

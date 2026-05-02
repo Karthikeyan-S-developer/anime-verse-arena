@@ -6,9 +6,9 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="text-6xl sm:text-7xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 text-lg sm:text-xl font-semibold text-foreground">Page not found</h2>
+        <p className="mt-2 text-sm sm:text-base text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
@@ -30,15 +30,15 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "AnimeVerse — Real-Time Anime Battle Arena" },
-      { name: "description", content: "Two-player real-time anime trivia and battle arena. Quiz battles, character guessing, rapid fire — choose your weapon." },
+      { name: "description", content: "Two-player real-time anime trivia. Quiz battles, character guessing, rapid fire — choose your weapon." },
       { name: "author", content: "AnimeVerse" },
       { property: "og:title", content: "AnimeVerse — Real-Time Anime Battle Arena" },
-      { property: "og:description", content: "Two-player real-time anime trivia and battle arena. Quiz battles, character guessing, rapid fire — choose your weapon." },
+      { property: "og:description", content: "Two-player real-time anime trivia. Quiz battles, character guessing, rapid fire — choose your weapon." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "AnimeVerse — Real-Time Anime Battle Arena" },
-      { name: "twitter:description", content: "Two-player real-time anime trivia and battle arena. Quiz battles, character guessing, rapid fire — choose your weapon." },
+      { name: "twitter:description", content: "Two-player real-time anime trivia. Quiz battles, character guessing, rapid fire — choose your weapon." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/fqWzDN52h6RXMkexwn4rVJwHp7E3/social-images/social-1777697400466-wmremove-transformed.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/fqWzDN52h6RXMkexwn4rVJwHp7E3/social-images/social-1777697400466-wmremove-transformed.webp" },
     ],

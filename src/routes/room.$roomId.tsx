@@ -27,10 +27,10 @@ function RoomPage() {
 
   if (loading || !room || !playerId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4" />
-          <p className="text-muted-foreground font-display tracking-widest">ENTERING ARENA...</p>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4" />
+          <p className="text-muted-foreground font-display tracking-widest text-sm sm:text-base">ENTERING ARENA...</p>
         </div>
       </div>
     );

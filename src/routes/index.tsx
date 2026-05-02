@@ -53,22 +53,22 @@ function Landing() {
 
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="text-center mb-12 animate-float-up">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 mb-6">
-            <Flame className="w-4 h-4 text-accent" />
-            <span className="text-sm tracking-wider uppercase text-accent font-semibold">Real-Time Multiplayer</span>
+        <div className="text-center mb-8 sm:mb-12 animate-float-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-primary/10 border border-primary/30 mb-4 sm:mb-6">
+            <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-accent" />
+            <span className="text-xs sm:text-sm tracking-wider uppercase text-accent font-semibold">Real-Time Multiplayer</span>
           </div>
-          <h1 className="text-7xl md:text-9xl font-display text-stroke text-foreground mb-4 leading-none">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-display text-stroke text-foreground mb-2 sm:mb-4 leading-none">
             ANIME<span className="text-primary">VERSE</span>
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Two warriors. One arena. Battle through anime trivia, character guessing, and rapid-fire challenges. Choose your weapon.
           </p>
         </div>
 
         {/* Auth/Join Card */}
-        <Card className="w-full max-w-md p-8 bg-card/80 backdrop-blur border-primary/30 shadow-blood animate-slash-in">
-          <div className="space-y-5">
+        <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 bg-card/80 backdrop-blur border-primary/30 shadow-blood animate-slash-in mx-4">
+          <div className="space-y-4 sm:space-y-5">
             <div>
               <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2 block">
                 Warrior Name
@@ -78,16 +78,16 @@ function Landing() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 maxLength={20}
-                className="bg-input border-border text-lg"
+                className="bg-input border-border text-base sm:text-lg h-10 sm:h-11"
               />
             </div>
 
             <Button
               onClick={handleCreate}
               disabled={loading !== null}
-              className="w-full h-12 bg-gradient-blood text-primary-foreground font-display text-lg tracking-wider hover:shadow-glow transition-shadow"
+              className="w-full h-10 sm:h-12 bg-gradient-blood text-primary-foreground font-display text-base sm:text-lg tracking-wider hover:shadow-glow transition-shadow"
             >
-              <Sword className="w-5 h-5 mr-2" />
+              <Sword className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               {loading === "create" ? "Forging Arena..." : "CREATE BATTLE ROOM"}
             </Button>
 
@@ -100,19 +100,19 @@ function Landing() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 placeholder="ROOM CODE"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 maxLength={6}
-                className="bg-input border-border font-mono tracking-widest text-center text-lg uppercase"
+                className="bg-input border-border font-mono tracking-widest text-center text-base sm:text-lg uppercase h-10 sm:h-11 flex-1"
               />
               <Button
                 onClick={handleJoin}
                 disabled={loading !== null}
                 variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 font-display tracking-wider px-6"
+                className="border-accent/50 text-accent hover:bg-accent/10 font-display tracking-wider px-4 sm:px-6 h-10 sm:h-11"
               >
                 {loading === "join" ? "..." : "JOIN"}
               </Button>
@@ -121,24 +121,20 @@ function Landing() {
         </Card>
 
         {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-4xl w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-8 sm:mt-12 max-w-4xl w-full px-4">
           {[
             { icon: Users, title: "1v1 Real-Time", desc: "Two-player synced battles" },
-            { icon: Zap, title: "7 Game Modes", desc: "Quiz, Rapid Fire, Battle Arena & more" },
+            { icon: Zap, title: "5 Game Modes", desc: "Quiz, Rapid Fire & more" },
             { icon: Flame, title: "AI-Generated", desc: "Fresh questions every match" },
           ].map((f) => (
-            <div key={f.title} className="p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur-sm">
-              <f.icon className="w-6 h-6 text-accent mb-2" />
-              <div className="font-semibold text-foreground">{f.title}</div>
-              <div className="text-sm text-muted-foreground">{f.desc}</div>
+            <div key={f.title} className="p-3 sm:p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur-sm">
+              <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-accent mb-2" />
+              <div className="font-semibold text-foreground text-sm sm:text-base">{f.title}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">{f.desc}</div>
             </div>
           ))}
         </div>
       </main>
-
-      <footer className="text-center text-xs text-muted-foreground py-6 border-t border-border/30">
-        Powered by Jikan API & Lovable AI · Built for anime warriors
-      </footer>
     </div>
   );
 }
