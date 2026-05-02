@@ -3,7 +3,7 @@ CREATE TABLE public.rooms (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   code TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL DEFAULT 'lobby', -- lobby | playing | finished
-  game_mode TEXT, -- quiz | guess_character | guess_anime | rapid_fire | spin_wheel
+  game_mode TEXT, -- quiz | guess_character | guess_anime | battle_arena | rapid_fire | spin_wheel | coop
   game_config JSONB DEFAULT '{}'::jsonb, -- anime/genre selection
   questions JSONB DEFAULT '[]'::jsonb, -- pre-generated questions
   current_question INT NOT NULL DEFAULT 0,
@@ -26,7 +26,7 @@ CREATE TABLE public.players (
   total_answer_ms INT NOT NULL DEFAULT 0,
   is_host BOOLEAN NOT NULL DEFAULT false,
   ready BOOLEAN NOT NULL DEFAULT false,
-  selected_character JSONB,
+  selected_character JSONB, -- for battle arena
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

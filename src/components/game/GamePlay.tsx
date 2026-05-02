@@ -42,7 +42,9 @@ export function GamePlay({
   const questions = (room.questions as unknown as Question[]) ?? [];
   const qIdx = room.current_question;
   const question = questions[qIdx];
+  const isCoop = room.game_mode === "coop";
   const isRapid = room.game_mode === "rapid_fire";
+  const isBattleArena = room.game_mode === "battle_arena";
 
   const startedAt = room.question_started_at ? new Date(room.question_started_at).getTime() : Date.now();
   const duration = isRapid ? RAPID_FIRE_TOTAL_MS : QUESTION_DURATION_MS;
@@ -70,6 +72,21 @@ export function GamePlay({
   const myAnswer = answers.find((a) => a.player_id === playerId && a.question_index === qIdx);
   const opponentAnswered = !!opponent && answers.some((a) => a.player_id === opponent.id && a.question_index === qIdx);
 
+  // Battle arena: each player picks a character and we compare favorites
+  const handleBattleArenaPick = async () => {
+    if (!question || myAnswer) return;
+    const points = question.stats?.favorites ?? 0;
+    await submitAnswer({
+      roomId: room.id,
+      playerId,
+      questionIndex: qIdx,
+      answer: question.question,
+      isCorrect: false, // resolved at round end
+      pointsEarned: points,
+      answerMs: elapsed,
+    });
+  };
+
   // Standard answer flow
   const handleAnswer = async (idx: number) => {
     if (!question || myAnswer || selected !== null) return;
@@ -93,6 +110,10 @@ export function GamePlay({
   useEffect(() => {
     if (isRapid) return;
     if (!question || myAnswer || remaining > 0) return;
+    if (isBattleArena) {
+      handleBattleArenaPick();
+      return;
+    }
     // submit no-answer
     submitAnswer({
       roomId: room.id,
@@ -106,7 +127,7 @@ export function GamePlay({
       updatePlayerScore(playerId, { score: 0, streak: 0, correct: false, answerMs: duration })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining, qIdx, myAnswer, isRapid]);
+  }, [remaining, qIdx, myAnswer, isRapid, isBattleArena]);
 
   // Reveal once both answered (or time up). Only host advances.
   const bothAnswered = useMemo(() => {
@@ -161,21 +182,21 @@ export function GamePlay({
   if (isRapid) {
     const rq = rapidQuestion!;
     return (
-      <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-4xl mx-auto">
-        <ScoreBar me={me} opponent={opponent} />
-        <div className="mb-3 sm:mb-4">
+      <div className="min-h-screen px-4 py-6 max-w-3xl mx-auto">
+        <ScoreBar me={me} opponent={opponent} isCoop={isCoop} />
+        <div className="mb-4">
           <div className="flex justify-between text-xs uppercase tracking-widest text-muted-foreground mb-2">
             <span>Rapid Fire</span>
             <span>{(remaining / 1000).toFixed(1)}s</span>
           </div>
           <Progress value={remainingPct} className="h-2" />
         </div>
-        <Card className="p-4 sm:p-6 bg-card border-primary/30 shadow-blood mb-4 animate-slash-in">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 whitespace-pre-line">{rq.question}</h2>
+        <Card className="p-6 bg-card border-primary/30 shadow-blood mb-4 animate-slash-in">
+          <h2 className="text-xl md:text-2xl font-semibold mb-4 whitespace-pre-line">{rq.question}</h2>
           {rq.imageUrl && (
             <img src={rq.imageUrl} alt="" className="w-full max-w-xs mx-auto rounded mb-4 blur-sm" />
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {rq.options.map((opt, i) => (
               <Button
                 key={i}
@@ -192,15 +213,52 @@ export function GamePlay({
     );
   }
 
+  // ---------- BATTLE ARENA UI ----------
+  if (isBattleArena) {
+    return (
+      <div className="min-h-screen px-4 py-6 max-w-3xl mx-auto">
+        <ScoreBar me={me} opponent={opponent} isCoop={isCoop} />
+        <div className="text-center mb-4">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">
+            Round {qIdx + 1} of {questions.length}
+          </p>
+          <h2 className="font-display text-3xl tracking-wider mt-1">PICK YOUR FIGHTER</h2>
+        </div>
+        <Progress value={remainingPct} className="h-2 mb-4" />
+        <Card className="p-6 bg-card border-primary/30 shadow-blood">
+          <div className="text-center">
+            {question.imageUrl && (
+              <img src={question.imageUrl} alt="" className="w-40 h-56 object-cover mx-auto rounded mb-3" />
+            )}
+            <div className="font-display text-2xl mb-1">{question.question}</div>
+            <div className="text-sm text-muted-foreground mb-4">
+              Power Level: <span className="text-accent font-semibold">{question.stats?.favorites?.toLocaleString() ?? "?"}</span>
+            </div>
+            <Button
+              onClick={handleBattleArenaPick}
+              disabled={!!myAnswer}
+              className="bg-gradient-ember text-primary-foreground font-display tracking-wider"
+            >
+              {myAnswer ? "PICKED" : "CLAIM THIS FIGHTER"}
+            </Button>
+            {myAnswer && !opponentAnswered && (
+              <p className="text-sm text-muted-foreground mt-3">Waiting for opponent...</p>
+            )}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   // ---------- STANDARD QUIZ UI ----------
   const myCorrect = myAnswer?.is_correct;
 
   return (
-    <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-4xl mx-auto">
-      <ScoreBar me={me} opponent={opponent} />
+    <div className="min-h-screen px-4 py-6 max-w-3xl mx-auto">
+      <ScoreBar me={me} opponent={opponent} isCoop={isCoop} />
 
       {/* Progress */}
-      <div className="mb-3 sm:mb-4">
+      <div className="mb-4">
         <div className="flex justify-between text-xs uppercase tracking-widest text-muted-foreground mb-2">
           <span>
             Question {qIdx + 1} / {questions.length}
@@ -210,8 +268,8 @@ export function GamePlay({
         <Progress value={remainingPct} className="h-2" />
       </div>
 
-      <Card className="p-4 sm:p-6 bg-card border-primary/30 shadow-blood mb-4 animate-slash-in" key={qIdx}>
-        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 whitespace-pre-line">{question.question}</h2>
+      <Card className="p-6 bg-card border-primary/30 shadow-blood mb-4 animate-slash-in" key={qIdx}>
+        <h2 className="text-xl md:text-2xl font-semibold mb-4 whitespace-pre-line">{question.question}</h2>
         {question.imageUrl && (
           <img
             src={question.imageUrl}
@@ -223,7 +281,7 @@ export function GamePlay({
             )}
           />
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {question.options.map((opt, i) => {
             const isSelected = selected === i || (myAnswer && Number(myAnswer.answer) === i);
             const isCorrect = i === question.correctIndex;
@@ -235,14 +293,14 @@ export function GamePlay({
                 disabled={!!myAnswer || selected !== null}
                 variant="outline"
                 className={cn(
-                  "h-auto py-3 sm:py-4 text-left justify-start whitespace-normal border-2 transition-all text-sm sm:text-base",
+                  "h-auto py-4 text-left justify-start whitespace-normal border-2 transition-all",
                   !showResult && "border-border hover:border-primary hover:bg-primary/10",
                   showResult && isCorrect && "border-success bg-success/20 text-success-foreground",
                   showResult && isSelected && !isCorrect && "border-destructive bg-destructive/20 animate-shake",
                   showResult && !isSelected && !isCorrect && "opacity-50"
                 )}
               >
-                <span className="font-mono text-xs mr-2 sm:mr-3 text-muted-foreground">
+                <span className="font-mono text-xs mr-3 text-muted-foreground">
                   {String.fromCharCode(65 + i)}
                 </span>
                 {opt}
@@ -267,30 +325,36 @@ export function GamePlay({
   );
 }
 
-function ScoreBar({ me, opponent }: { me?: Player; opponent?: Player }) {
+function ScoreBar({ me, opponent, isCoop }: { me?: Player; opponent?: Player; isCoop: boolean }) {
+  const totalCoop = (me?.score ?? 0) + (opponent?.score ?? 0);
   return (
-    <div className="grid grid-cols-2 gap-3 mb-4 sm:mb-6">
+    <div className="grid grid-cols-2 gap-3 mb-6">
       <PlayerCard player={me} label="You" mine />
       <PlayerCard player={opponent} label="Opponent" />
+      {isCoop && (
+        <div className="col-span-2 text-center font-display tracking-widest text-accent">
+          TEAM SCORE: {totalCoop}
+        </div>
+      )}
     </div>
   );
 }
 
 function PlayerCard({ player, label, mine }: { player?: Player; label: string; mine?: boolean }) {
   return (
-    <Card className={cn("p-2 sm:p-3 flex items-center gap-2 sm:gap-3", mine ? "border-primary/40" : "border-border")}>
+    <Card className={cn("p-3 flex items-center gap-3", mine ? "border-primary/40" : "border-border")}>
       <div className={cn(
-        "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-display text-sm sm:text-base",
+        "w-10 h-10 rounded-full flex items-center justify-center font-display",
         mine ? "bg-gradient-blood text-primary-foreground" : "bg-secondary"
       )}>
         {player?.username?.charAt(0).toUpperCase() ?? "?"}
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-xs uppercase text-muted-foreground tracking-wider">{label}</div>
-        <div className="truncate font-semibold text-sm sm:text-base">{player?.username ?? "—"}</div>
+        <div className="truncate font-semibold">{player?.username ?? "—"}</div>
       </div>
       <div className="text-right">
-        <div className="font-display text-xl sm:text-2xl text-accent leading-none">{player?.score ?? 0}</div>
+        <div className="font-display text-2xl text-accent leading-none">{player?.score ?? 0}</div>
         {(player?.streak ?? 0) > 1 && (
           <div className="flex items-center gap-1 text-xs text-accent justify-end">
             <Flame className="w-3 h-3" />
@@ -298,7 +362,7 @@ function PlayerCard({ player, label, mine }: { player?: Player; label: string; m
           </div>
         )}
       </div>
-      {mine && <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />}
+      {mine && <Zap className="w-4 h-4 text-primary" />}
     </Card>
   );
 }

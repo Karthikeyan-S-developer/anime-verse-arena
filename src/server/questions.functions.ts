@@ -12,7 +12,7 @@ export interface QuizQuestion {
 }
 
 const inputSchema = z.object({
-  mode: z.enum(["quiz", "guess_character", "guess_anime", "rapid_fire"]),
+  mode: z.enum(["quiz", "guess_character", "guess_anime", "rapid_fire", "coop"]),
   topic: z.string().optional(), // anime title or genre or "random"
   count: z.number().min(3).max(20).default(10),
 });
@@ -98,7 +98,7 @@ async function fallbackQuestions(mode: string, count: number): Promise<QuizQuest
       });
     }
   } else {
-    // quiz / rapid_fire fallback - mix of character and anime questions
+    // quiz / rapid_fire / coop fallback - mix of character and anime questions
     const half = Math.ceil(count / 2);
     for (const c of pick(chars, half)) {
       if (!c.images?.jpg?.image_url) continue;
@@ -206,7 +206,7 @@ export const generateQuestions = createServerFn({ method: "POST" })
       return { questions: qs, source: "jikan" as const };
     }
 
-    // Try AI first for quiz/rapid_fire
+    // Try AI first for quiz/rapid_fire/coop
     const ai = await aiQuestions(data.mode, data.topic || "random", data.count);
     if (ai && ai.length >= 3) {
       return { questions: ai, source: "ai" as const };

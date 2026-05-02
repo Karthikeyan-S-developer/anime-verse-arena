@@ -95,26 +95,10 @@
     background-attachment: fixed;
     color: var(--color-foreground);
     font-family: ui-sans-serif, system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, .display {
     font-family: var(--font-display);
-  }
-
-  /* Ensure proper touch targets on mobile */
-  @media (max-width: 768px) {
-    button, [role="button"], input, select, textarea {
-      min-height: 44px;
-      min-width: 44px;
-    }
-  }
-
-  /* Improve text readability on small screens */
-  @media (max-width: 640px) {
-    h1 { font-size: clamp(2rem, 8vw, 3rem); }
-    h2 { font-size: clamp(1.5rem, 6vw, 2rem); }
-    p { font-size: clamp(0.875rem, 4vw, 1rem); }
+    letter-spacing: 0.02em;
   }
 }
 

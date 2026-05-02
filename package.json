@@ -1,15 +1,11 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
-  "packageManager": "npm@10.9.2",
   "sideEffects": false,
   "type": "module",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "vercel-build": "npm run build",
-    "build:cloudflare": "npm run build",
-    "deploy:cloudflare": "npm run build && npx wrangler deploy --config dist/server/wrangler.json dist/server/index.js",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
