@@ -12,9 +12,14 @@ export interface QuizQuestion {
 }
 
 const inputSchema = z.object({
-  mode: z.enum(["quiz", "guess_character", "guess_anime", "rapid_fire", "coop"]),
+  mode: z.enum(["quiz", "guess_character", "guess_anime", "rapid_fire"]),
   topic: z.string().optional(), // anime title or genre or "random"
   count: z.number().min(3).max(20).default(10),
+  selectedAnimes: z.array(z.object({
+    mal_id: z.number(),
+    title: z.string(),
+    title_english: z.string().optional(),
+  })).optional().default([]),
 });
 
 interface JikanAnime {
@@ -22,7 +27,11 @@ interface JikanAnime {
   title: string;
   title_english?: string;
   synopsis?: string;
-  images: { jpg: { large_image_url: string } };
+  score?: number;
+  popularity?: number;
+  favorites?: number;
+  members?: number;
+  images: { jpg: { large_image_url: string; image_url: string } };
   genres?: { name: string }[];
 }
 interface JikanCharacter {
@@ -39,6 +48,25 @@ async function jikanTopAnime(): Promise<JikanAnime[]> {
     return (await r.json()).data || [];
   } catch { return []; }
 }
+
+async function jikanGetAnimeById(malId: number): Promise<JikanAnime | null> {
+  try {
+    const r = await fetch(`https://api.jikan.moe/v4/anime/${malId}`);
+    if (!r.ok) return null;
+    const data = await r.json();
+    return data.data || null;
+  } catch { return null; }
+}
+
+async function jikanGetCharactersByAnime(malId: number): Promise<JikanCharacter[]> {
+  try {
+    const r = await fetch(`https://api.jikan.moe/v4/anime/${malId}/characters?limit=25`);
+    if (!r.ok) return [];
+    const data = await r.json();
+    return (data.data || []).map((item: any) => item.character).filter(Boolean);
+  } catch { return []; }
+}
+
 async function jikanTopChars(): Promise<JikanCharacter[]> {
   try {
     const r = await fetch("https://api.jikan.moe/v4/top/characters?limit=25");
@@ -64,6 +92,109 @@ function buildOptions(correct: string, pool: string[]): { options: string[]; cor
   const wrong = pick(pool.filter((p) => p !== correct), 3);
   const options = shuffle([correct, ...wrong]);
   return { options, correctIndex: options.indexOf(correct) };
+}
+
+// Question generator from selected animes only
+async function questionsFromSelectedAnimes(
+  mode: string, 
+  count: number, 
+  selectedAnimes: Array<{mal_id: number; title: string; title_english?: string}>
+): Promise<QuizQuestion[]> {
+  const questions: QuizQuestion[] = [];
+  
+  if (!selectedAnimes || selectedAnimes.length === 0) {
+    return [];
+  }
+
+  if (mode === "guess_character") {
+    // Get characters from all selected animes
+    const allCharsFetches = selectedAnimes.map(a => jikanGetCharactersByAnime(a.mal_id));
+    const charsByAnime = await Promise.all(allCharsFetches);
+    const allChars = charsByAnime.flat().filter(c => c && c.images?.jpg?.image_url);
+    
+    if (allChars.length === 0) return [];
+    
+    const charNames = allChars.map((c) => c.name).filter(Boolean);
+    
+    for (const c of pick(allChars, Math.min(count, allChars.length))) {
+      if (!c.images?.jpg?.image_url) continue;
+      const { options, correctIndex } = buildOptions(c.name, charNames);
+      questions.push({
+        type: "guess_character",
+        question: "Which anime character is this?",
+        imageUrl: c.images.jpg.image_url,
+        options,
+        correctIndex,
+      });
+    }
+  } else if (mode === "guess_anime") {
+    // Use only selected animes with synopses
+    const selectedWithData = await Promise.all(
+      selectedAnimes.map(a => jikanGetAnimeById(a.mal_id))
+    );
+    const validAnimes = selectedWithData.filter(a => a && a.synopsis) as JikanAnime[];
+    
+    if (validAnimes.length === 0) return [];
+    
+    const animeNames = validAnimes.map((a) => a.title_english || a.title).filter(Boolean);
+    
+    for (const a of pick(validAnimes, Math.min(count, validAnimes.length))) {
+      const title = a.title_english || a.title;
+      const synopsis = (a.synopsis || "").slice(0, 280).replace(new RegExp(title, "gi"), "█████");
+      const { options, correctIndex } = buildOptions(title, animeNames);
+      questions.push({
+        type: "guess_anime",
+        question: `Guess this anime from the description:\n\n"${synopsis}..."`,
+        options,
+        correctIndex,
+      });
+    }
+  } else {
+    // quiz / rapid_fire - get both characters and animes from selected
+    const allCharsFetches = selectedAnimes.map(a => jikanGetCharactersByAnime(a.mal_id));
+    const charsByAnime = await Promise.all(allCharsFetches);
+    const allChars = charsByAnime.flat().filter(c => c && c.images?.jpg?.image_url);
+    
+    const selectedWithData = await Promise.all(
+      selectedAnimes.map(a => jikanGetAnimeById(a.mal_id))
+    );
+    const validAnimes = selectedWithData.filter(a => a) as JikanAnime[];
+    
+    const charNames = allChars.map((c) => c.name).filter(Boolean);
+    const animeNames = validAnimes.map((a) => a.title_english || a.title).filter(Boolean);
+    
+    // Mix of character and anime questions
+    const half = Math.ceil(count / 2);
+    for (const c of pick(allChars, Math.min(half, allChars.length))) {
+      if (!c.images?.jpg?.image_url) continue;
+      const { options, correctIndex } = buildOptions(c.name, charNames);
+      questions.push({
+        type: "quiz",
+        question: "Identify this character",
+        imageUrl: c.images.jpg.image_url,
+        options,
+        correctIndex,
+      });
+    }
+    
+    for (const a of pick(
+      validAnimes.filter((x) => x.synopsis),
+      Math.min(count - questions.length, validAnimes.length)
+    )) {
+      if (!a.synopsis) continue;
+      const title = a.title_english || a.title;
+      const synopsis = (a.synopsis || "").slice(0, 220).replace(new RegExp(title, "gi"), "█████");
+      const { options, correctIndex } = buildOptions(title, animeNames);
+      questions.push({
+        type: "quiz",
+        question: `Which anime?\n"${synopsis}..."`,
+        options,
+        correctIndex,
+      });
+    }
+  }
+  
+  return shuffle(questions).slice(0, count);
 }
 
 // Fallback question generator from Jikan data
@@ -98,7 +229,7 @@ async function fallbackQuestions(mode: string, count: number): Promise<QuizQuest
       });
     }
   } else {
-    // quiz / rapid_fire / coop fallback - mix of character and anime questions
+    // quiz / rapid_fire fallback - mix of character and anime questions
     const half = Math.ceil(count / 2);
     for (const c of pick(chars, half)) {
       if (!c.images?.jpg?.image_url) continue;
@@ -127,11 +258,17 @@ async function fallbackQuestions(mode: string, count: number): Promise<QuizQuest
   return shuffle(questions).slice(0, count);
 }
 
-async function aiQuestions(mode: string, topic: string, count: number): Promise<QuizQuestion[] | null> {
+async function aiQuestions(mode: string, topic: string, count: number, selectedAnimes?: Array<{mal_id: number; title: string; title_english?: string}>): Promise<QuizQuestion[] | null> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) return null;
 
-  const topicHint = topic && topic !== "random" ? `Focus on the anime/topic: "${topic}".` : "Pick popular shonen and seinen anime.";
+  let topicHint = topic && topic !== "random" ? `Focus on the anime/topic: "${topic}".` : "Pick popular shonen and seinen anime.";
+  
+  if (selectedAnimes && selectedAnimes.length > 0) {
+    const animeNames = selectedAnimes.map(a => a.title_english || a.title).join(", ");
+    topicHint = `IMPORTANT: Generate questions ONLY about these animes: ${animeNames}. Do not include questions about other animes.`;
+  }
+  
   const prompt = `Generate ${count} multiple-choice anime trivia questions. ${topicHint}
 Mix character identification, dialogue completion, ability/power, and episode-based questions.
 Each question must have exactly 4 plausible options and one correct answer.
@@ -206,8 +343,8 @@ export const generateQuestions = createServerFn({ method: "POST" })
       return { questions: qs, source: "jikan" as const };
     }
 
-    // Try AI first for quiz/rapid_fire/coop
-    const ai = await aiQuestions(data.mode, data.topic || "random", data.count);
+    // Try AI first for quiz/rapid_fire
+    const ai = await aiQuestions(data.mode, data.topic || "random", data.count, data.selectedAnimes);
     if (ai && ai.length >= 3) {
       return { questions: ai, source: "ai" as const };
     }

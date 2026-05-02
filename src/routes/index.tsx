@@ -58,16 +58,16 @@ function Landing() {
             <Flame className="w-4 h-4 text-accent" />
             <span className="text-sm tracking-wider uppercase text-accent font-semibold">Real-Time Multiplayer</span>
           </div>
-          <h1 className="text-7xl md:text-9xl font-display text-stroke text-foreground mb-4 leading-none">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-display text-stroke text-foreground mb-4 leading-none">
             ANIME<span className="text-primary">VERSE</span>
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
             Two warriors. One arena. Battle through anime trivia, character guessing, and rapid-fire challenges. Choose your weapon.
           </p>
         </div>
 
         {/* Auth/Join Card */}
-        <Card className="w-full max-w-md p-8 bg-card/80 backdrop-blur border-primary/30 shadow-blood animate-slash-in">
+        <Card className="w-full max-w-md p-4 sm:p-6 md:p-8 bg-card/80 backdrop-blur border-primary/30 shadow-blood animate-slash-in">
           <div className="space-y-5">
             <div>
               <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2 block">
@@ -121,7 +121,7 @@ function Landing() {
         </Card>
 
         {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-4xl w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-12 max-w-4xl w-full px-4">
           {[
             { icon: Users, title: "1v1 Real-Time", desc: "Two-player synced battles" },
             { icon: Zap, title: "7 Game Modes", desc: "Quiz, Rapid Fire, Battle Arena & more" },

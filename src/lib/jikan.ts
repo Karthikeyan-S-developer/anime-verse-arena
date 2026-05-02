@@ -36,6 +36,13 @@ export async function getTopCharacters(limit = 25): Promise<JikanCharacter[]> {
   return j.data || [];
 }
 
+export async function searchCharacters(q: string): Promise<JikanCharacter[]> {
+  const r = await fetch(`${JIKAN}/characters?q=${encodeURIComponent(q)}&limit=10&order_by=favorites&sort=desc`);
+  if (!r.ok) return [];
+  const j = await r.json();
+  return j.data || [];
+}
+
 export async function searchAnime(q: string): Promise<JikanAnime[]> {
   const r = await fetch(`${JIKAN}/anime?q=${encodeURIComponent(q)}&limit=10&sfw=true`);
   if (!r.ok) return [];

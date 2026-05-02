@@ -40,7 +40,6 @@ export async function joinRoom(code: string, username: string): Promise<{ roomId
     .select("*", { count: "exact", head: true })
     .eq("room_id", room.id);
 
-  if ((count ?? 0) >= 2) throw new Error("Room is full");
   if (room.status !== "lobby") throw new Error("Game already in progress");
 
   const { data: player, error: pErr } = await supabase
@@ -122,6 +121,13 @@ export async function updatePlayerScore(playerId: string, delta: { score: number
       total_answer_ms: p.total_answer_ms + delta.answerMs,
     })
     .eq("id", playerId);
+}
+
+export async function updatePlayerProfile(playerId: string, username?: string, selectedCharacter?: any) {
+  const updates: any = {};
+  if (username !== undefined) updates.username = username;
+  if (selectedCharacter !== undefined) updates.selected_character = selectedCharacter;
+  await supabase.from("players").update(updates).eq("id", playerId);
 }
 
 export async function backToLobby(roomId: string) {

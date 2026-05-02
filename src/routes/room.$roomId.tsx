@@ -13,7 +13,7 @@ export const Route = createFileRoute("/room/$roomId")({
 function RoomPage() {
   const { roomId } = Route.useParams();
   const navigate = useNavigate();
-  const { room, players, answers, loading } = useRoom(roomId);
+  const { room, players, answers, loading, refresh } = useRoom(roomId);
   const [playerId, setPlayerId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function RoomPage() {
   return (
     <div className="min-h-screen">
       <Toaster theme="dark" />
-      {room.status === "lobby" && <Lobby room={room} players={players} playerId={playerId} />}
+      {room.status === "lobby" && <Lobby room={room} players={players} playerId={playerId} refresh={refresh} />}
       {room.status === "playing" && (
         <GamePlay room={room} players={players} answers={answers} playerId={playerId} />
       )}
