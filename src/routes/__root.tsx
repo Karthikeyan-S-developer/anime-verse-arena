@@ -32,11 +32,15 @@ export const Route = createRootRoute({
       { title: "AnimeVerse — Real-Time Anime Battle Arena" },
       { name: "description", content: "Two-player real-time anime trivia and battle arena. Quiz battles, character guessing, rapid fire — choose your weapon." },
       { name: "author", content: "AnimeVerse" },
-      { property: "og:title", content: "AnimeVerse — Anime Battle Arena" },
-      { property: "og:description", content: "Two-player real-time anime trivia and battle arena." },
+      { property: "og:title", content: "AnimeVerse — Real-Time Anime Battle Arena" },
+      { property: "og:description", content: "Two-player real-time anime trivia and battle arena. Quiz battles, character guessing, rapid fire — choose your weapon." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "AnimeVerse — Real-Time Anime Battle Arena" },
+      { name: "twitter:description", content: "Two-player real-time anime trivia and battle arena. Quiz battles, character guessing, rapid fire — choose your weapon." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/fqWzDN52h6RXMkexwn4rVJwHp7E3/social-images/social-1777697400466-wmremove-transformed.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/fqWzDN52h6RXMkexwn4rVJwHp7E3/social-images/social-1777697400466-wmremove-transformed.webp" },
     ],
     links: [
       {
