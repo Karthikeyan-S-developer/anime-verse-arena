@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Copy, Crown, Sword, Brain, ImageIcon, FileText, Timer, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { startGame, leaveRoom } from "@/lib/room-actions";
-import { generateQuestions } from "@/lib/questions.server";
+import { generateQuestions } from "@/lib/questions.functions";
 import { useNavigate } from "@tanstack/react-router";
 import { Profile } from "./Profile";
 import { supabase } from "@/integrations/supabase/client";
