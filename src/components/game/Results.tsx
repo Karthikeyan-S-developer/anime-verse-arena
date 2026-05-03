@@ -83,8 +83,8 @@ export function Results({ room, players, playerId }: { room: Room; players: Play
                 )}>
                   {p.selected_character ? (
                     <img
-                      src={p.selected_character.images.jpg.image_url}
-                      alt={p.selected_character.name}
+                      src={(p.selected_character as any).images.jpg.image_url}
+                      alt={(p.selected_character as any).name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
