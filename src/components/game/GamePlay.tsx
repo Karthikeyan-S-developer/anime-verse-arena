@@ -46,7 +46,8 @@ export function GamePlay({
   const isBattleArena = room.game_mode === "battle_arena";
 
   const startedAt = room.question_started_at ? new Date(room.question_started_at).getTime() : Date.now();
-  const duration = isRapid ? RAPID_FIRE_TOTAL_MS : QUESTION_DURATION_MS;
+  const rapidDurationSec = (room.game_config as any)?.rapidDurationSec ?? 30;
+  const duration = isRapid ? rapidDurationSec * 1000 : QUESTION_DURATION_MS;
 
   const [now, setNow] = useState(Date.now());
   const [selected, setSelected] = useState<number | null>(null);
