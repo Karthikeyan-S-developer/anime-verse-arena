@@ -40,8 +40,8 @@ export function Results({ room, players, playerId }: { room: Room; players: Play
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-ember flex items-center justify-center overflow-hidden">
               {winner?.selected_character ? (
                 <img
-                  src={winner.selected_character.images.jpg.image_url}
-                  alt={winner.selected_character.name}
+                  src={(winner.selected_character as any).images.jpg.image_url}
+                  alt={(winner.selected_character as any).name}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -83,8 +83,8 @@ export function Results({ room, players, playerId }: { room: Room; players: Play
                 )}>
                   {p.selected_character ? (
                     <img
-                      src={p.selected_character.images.jpg.image_url}
-                      alt={p.selected_character.name}
+                      src={(p.selected_character as any).images.jpg.image_url}
+                      alt={(p.selected_character as any).name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
