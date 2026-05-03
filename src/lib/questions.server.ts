@@ -337,18 +337,33 @@ Return ONLY valid JSON, no commentary.`;
 export const generateQuestions = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => inputSchema.parse(d))
   .handler(async ({ data }) => {
+    const hasSelected = Array.isArray(data.selectedAnimes) && data.selectedAnimes.length > 0;
+
     // For image-based modes, always use Jikan (we need real character/anime images).
     if (data.mode === "guess_character" || data.mode === "guess_anime") {
+      if (hasSelected) {
+        const qs = await questionsFromSelectedAnimes(data.mode, data.count, data.selectedAnimes);
+        if (qs.length >= 1) return { questions: qs, source: "jikan" as const };
+      }
       const qs = await fallbackQuestions(data.mode, data.count);
       return { questions: qs, source: "jikan" as const };
     }
 
-    // Try AI first for quiz/rapid_fire
+    // Quiz / rapid_fire: if host picked specific anime(s), strictly use them.
+    if (hasSelected) {
+      const ai = await aiQuestions(data.mode, data.topic || "random", data.count, data.selectedAnimes);
+      if (ai && ai.length >= 3) {
+        return { questions: ai, source: "ai" as const };
+      }
+      const qs = await questionsFromSelectedAnimes(data.mode, data.count, data.selectedAnimes);
+      if (qs.length >= 1) return { questions: qs, source: "jikan" as const };
+    }
+
+    // No selection -> general AI then generic Jikan fallback.
     const ai = await aiQuestions(data.mode, data.topic || "random", data.count, data.selectedAnimes);
     if (ai && ai.length >= 3) {
       return { questions: ai, source: "ai" as const };
     }
-
     const qs = await fallbackQuestions(data.mode, data.count);
     return { questions: qs, source: "jikan" as const };
   });
