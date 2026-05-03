@@ -134,12 +134,8 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
       return;
     }
     
-    // For modes other than guess_anime, require selected animes
+    // If no animes selected, server will fall back to general questions across any anime
     const mode = selectedMode as "quiz" | "guess_character" | "guess_anime" | "rapid_fire";
-    if (mode !== "guess_anime" && selectedAnimes.length === 0) {
-      toast.error("Please select at least one anime");
-      return;
-    }
 
     setStarting(true);
     try {
