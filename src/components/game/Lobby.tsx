@@ -33,14 +33,26 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
   const [animeSearchResults, setAnimeSearchResults] = useState<JikanAnime[]>([]);
   const [selectedAnimes, setSelectedAnimes] = useState<JikanAnime[]>((room.game_config as any)?.selectedAnimes || []);
   const [searchingAnime, setSearchingAnime] = useState(false);
+  const [rapidDurationSec, setRapidDurationSec] = useState<number>((room.game_config as any)?.rapidDurationSec || 30);
 
   useEffect(() => {
     const config = room.game_config as any;
     if (config) {
       setSelectedMode(config.selectedMode || "quiz");
       setSelectedAnimes(config.selectedAnimes || []);
+      if (config.rapidDurationSec) setRapidDurationSec(config.rapidDurationSec);
     }
   }, [room.game_config]);
+
+  const updateRapidDuration = async (sec: number) => {
+    if (!isHost) return;
+    setRapidDurationSec(sec);
+    const currentConfig = (room.game_config as any) || {};
+    await supabase
+      .from("rooms")
+      .update({ game_config: { ...currentConfig, rapidDurationSec: sec } })
+      .eq("id", room.id);
+  };
 
   const updateSelectedMode = async (mode: string) => {
     if (!isHost) return;
