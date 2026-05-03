@@ -183,7 +183,7 @@ export function GamePlay({
     const rq = rapidQuestion!;
     return (
       <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-3xl mx-auto">
-        <ScoreBar me={me} isCoop={isCoop} />
+        <ScoreBar me={me} players={players} isCoop={isCoop} />
         <div className="mb-3 sm:mb-4">
           <div className="flex justify-between text-xs uppercase tracking-widest text-muted-foreground mb-2 text-center">
             <span>Rapid Fire</span>
@@ -217,7 +217,7 @@ export function GamePlay({
   if (isBattleArena) {
     return (
       <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-3xl mx-auto">
-        <ScoreBar me={me} isCoop={isCoop} />
+        <ScoreBar me={me} players={players} isCoop={isCoop} />
         <div className="text-center mb-3 sm:mb-4">
           <p className="text-xs uppercase tracking-widest text-muted-foreground">
             Round {qIdx + 1} of {questions.length}
@@ -255,7 +255,7 @@ export function GamePlay({
 
   return (
     <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-3xl mx-auto">
-      <ScoreBar me={me} isCoop={isCoop} />
+      <ScoreBar me={me} players={players} isCoop={isCoop} />
 
       {/* Progress */}
       <div className="mb-3 sm:mb-4">
