@@ -362,7 +362,7 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
 
             <Button
               onClick={handleStart}
-              disabled={starting || players.length < 2 || (selectedMode !== "guess_anime" && selectedAnimes.length === 0)}
+              disabled={starting || players.length < 2}
               className="w-full h-12 bg-gradient-ember text-primary-foreground font-display text-lg tracking-wider hover:shadow-glow"
             >
               {starting ? "PREPARING..." : players.length < 1 ? "WAITING FOR PLAYERS" : "BEGIN BATTLE"}
