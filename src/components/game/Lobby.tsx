@@ -165,7 +165,8 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
       await startGame(room.id, selectedMode, result.questions, { 
         source: result.source, 
         originalMode: selectedMode,
-        selectedAnimes: selectedAnimes
+        selectedAnimes: selectedAnimes,
+        rapidDurationSec,
       });
     } catch (e) {
       console.error(e);
