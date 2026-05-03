@@ -195,8 +195,8 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-blood flex items-center justify-center font-display text-lg sm:text-xl text-primary-foreground flex-shrink-0 overflow-hidden">
                 {p.selected_character ? (
                   <img
-                    src={p.selected_character.images.jpg.image_url}
-                    alt={p.selected_character.name}
+                    src={(p.selected_character as any).images.jpg.image_url}
+                    alt={(p.selected_character as any).name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
