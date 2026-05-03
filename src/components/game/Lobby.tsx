@@ -33,14 +33,26 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
   const [animeSearchResults, setAnimeSearchResults] = useState<JikanAnime[]>([]);
   const [selectedAnimes, setSelectedAnimes] = useState<JikanAnime[]>((room.game_config as any)?.selectedAnimes || []);
   const [searchingAnime, setSearchingAnime] = useState(false);
+  const [rapidDurationSec, setRapidDurationSec] = useState<number>((room.game_config as any)?.rapidDurationSec || 30);
 
   useEffect(() => {
     const config = room.game_config as any;
     if (config) {
       setSelectedMode(config.selectedMode || "quiz");
       setSelectedAnimes(config.selectedAnimes || []);
+      if (config.rapidDurationSec) setRapidDurationSec(config.rapidDurationSec);
     }
   }, [room.game_config]);
+
+  const updateRapidDuration = async (sec: number) => {
+    if (!isHost) return;
+    setRapidDurationSec(sec);
+    const currentConfig = (room.game_config as any) || {};
+    await supabase
+      .from("rooms")
+      .update({ game_config: { ...currentConfig, rapidDurationSec: sec } })
+      .eq("id", room.id);
+  };
 
   const updateSelectedMode = async (mode: string) => {
     if (!isHost) return;
@@ -153,7 +165,8 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
       await startGame(room.id, selectedMode, result.questions, { 
         source: result.source, 
         originalMode: selectedMode,
-        selectedAnimes: selectedAnimes
+        selectedAnimes: selectedAnimes,
+        rapidDurationSec,
       });
     } catch (e) {
       console.error(e);
@@ -249,6 +262,31 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
             );
           })}
         </div>
+
+        {/* Rapid Fire duration */}
+        {selectedMode === "rapid_fire" && (
+          <div className="mb-4 p-3 rounded-lg border border-border bg-card/40">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-2">
+              Rapid Fire Duration: <span className="text-accent font-display">{rapidDurationSec}s</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[15, 30, 45, 60, 90, 120].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => updateRapidDuration(s)}
+                  disabled={!isHost}
+                  className={`px-3 py-1 rounded border text-sm transition-all ${
+                    rapidDurationSec === s
+                      ? "border-primary bg-primary/10 text-accent"
+                      : "border-border hover:border-primary/40"
+                  } ${!isHost ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {s}s
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Selected Animes Display - visible to all players */}
         {selectedMode !== "guess_anime" && selectedAnimes.length > 0 && (

@@ -46,7 +46,8 @@ export function GamePlay({
   const isBattleArena = room.game_mode === "battle_arena";
 
   const startedAt = room.question_started_at ? new Date(room.question_started_at).getTime() : Date.now();
-  const duration = isRapid ? RAPID_FIRE_TOTAL_MS : QUESTION_DURATION_MS;
+  const rapidDurationSec = (room.game_config as any)?.rapidDurationSec ?? 30;
+  const duration = isRapid ? rapidDurationSec * 1000 : QUESTION_DURATION_MS;
 
   const [now, setNow] = useState(Date.now());
   const [selected, setSelected] = useState<number | null>(null);
@@ -182,7 +183,7 @@ export function GamePlay({
     const rq = rapidQuestion!;
     return (
       <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-3xl mx-auto">
-        <ScoreBar me={me} isCoop={isCoop} />
+        <ScoreBar me={me} players={players} isCoop={isCoop} />
         <div className="mb-3 sm:mb-4">
           <div className="flex justify-between text-xs uppercase tracking-widest text-muted-foreground mb-2 text-center">
             <span>Rapid Fire</span>
@@ -216,7 +217,7 @@ export function GamePlay({
   if (isBattleArena) {
     return (
       <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-3xl mx-auto">
-        <ScoreBar me={me} isCoop={isCoop} />
+        <ScoreBar me={me} players={players} isCoop={isCoop} />
         <div className="text-center mb-3 sm:mb-4">
           <p className="text-xs uppercase tracking-widest text-muted-foreground">
             Round {qIdx + 1} of {questions.length}
@@ -254,7 +255,7 @@ export function GamePlay({
 
   return (
     <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-6 max-w-3xl mx-auto">
-      <ScoreBar me={me} isCoop={isCoop} />
+      <ScoreBar me={me} players={players} isCoop={isCoop} />
 
       {/* Progress */}
       <div className="mb-3 sm:mb-4">
@@ -324,13 +325,23 @@ export function GamePlay({
   );
 }
 
-function ScoreBar({ me, isCoop }: { me?: Player; isCoop: boolean }) {
+function ScoreBar({ me, players, isCoop }: { me?: Player; players: Player[]; isCoop: boolean }) {
+  const teamScore = players.reduce((s, p) => s + (p.score ?? 0), 0);
   return (
-    <div className="flex justify-center mb-6">
-      <PlayerCard player={me} label="Your Score" mine />
+    <div className="mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+        {players.map((p) => (
+          <PlayerCard
+            key={p.id}
+            player={p}
+            label={p.id === me?.id ? "You" : "Opponent"}
+            mine={p.id === me?.id}
+          />
+        ))}
+      </div>
       {isCoop && (
-        <div className="ml-4 text-center font-display tracking-widest text-accent">
-          TEAM SCORE: {me?.score ?? 0}
+        <div className="mt-2 text-center font-display tracking-widest text-accent">
+          TEAM SCORE: {teamScore}
         </div>
       )}
     </div>
@@ -338,13 +349,18 @@ function ScoreBar({ me, isCoop }: { me?: Player; isCoop: boolean }) {
 }
 
 function PlayerCard({ player, label, mine }: { player?: Player; label: string; mine?: boolean }) {
+  const character = (player as any)?.selected_character;
   return (
     <Card className={cn("p-3 flex items-center gap-3", mine ? "border-primary/40" : "border-border")}>
       <div className={cn(
-        "w-10 h-10 rounded-full flex items-center justify-center font-display",
+        "w-10 h-10 rounded-full flex items-center justify-center font-display overflow-hidden flex-shrink-0",
         mine ? "bg-gradient-blood text-primary-foreground" : "bg-secondary"
       )}>
-        {player?.username?.charAt(0).toUpperCase() ?? "?"}
+        {character?.images?.jpg?.image_url ? (
+          <img src={character.images.jpg.image_url} alt={character.name} className="w-full h-full object-cover" />
+        ) : (
+          player?.username?.charAt(0).toUpperCase() ?? "?"
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-xs uppercase text-muted-foreground tracking-wider">{label}</div>
@@ -363,3 +379,4 @@ function PlayerCard({ player, label, mine }: { player?: Player; label: string; m
     </Card>
   );
 }
+
