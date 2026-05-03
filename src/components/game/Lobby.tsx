@@ -263,6 +263,31 @@ export function Lobby({ room, players, playerId, refresh }: { room: Room; player
           })}
         </div>
 
+        {/* Rapid Fire duration */}
+        {selectedMode === "rapid_fire" && (
+          <div className="mb-4 p-3 rounded-lg border border-border bg-card/40">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-2">
+              Rapid Fire Duration: <span className="text-accent font-display">{rapidDurationSec}s</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[15, 30, 45, 60, 90, 120].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => updateRapidDuration(s)}
+                  disabled={!isHost}
+                  className={`px-3 py-1 rounded border text-sm transition-all ${
+                    rapidDurationSec === s
+                      ? "border-primary bg-primary/10 text-accent"
+                      : "border-border hover:border-primary/40"
+                  } ${!isHost ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {s}s
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Selected Animes Display - visible to all players */}
         {selectedMode !== "guess_anime" && selectedAnimes.length > 0 && (
           <div className="mb-6">
