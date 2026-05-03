@@ -1,1 +1,8 @@
-{"version":2,"public":true,"routes":[{"src":"/favicon.ico","dest":"/favicon.ico"},{"src":"/(.*)","dest":"/public/$1"}]}
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
